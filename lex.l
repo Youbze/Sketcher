@@ -1,9 +1,21 @@
 %{
 #include "const.h"
+#include "bi.tab.h"
 %}
 
 %%
 
-[[:digit:]] return NB;
+[[:digit:]] {/*yylval.entier = atoi(yytext);*/ return NB;}
+"+" return '+';
+"*" return '*';
+"-" return '-';
+"/" return '/';
+"(" return '(';
+")" return ')';
+":" return ':';
+"," return ',';
+
+
+
 
 %%
