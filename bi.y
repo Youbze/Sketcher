@@ -7,11 +7,12 @@
 	double db;
 }
 
+%token DRAW
 %token NB
-%token EOL
+%token EOL ENDFILE
 
 %%
-in:		line in
+in:		in line ENDFILE {printf("Hooooo noon c'est finiittttt \n"); return 0;}
 		| 
 		;
 
@@ -19,7 +20,7 @@ line: 	cmd EOL
 		| error EOL	{printf("\nERROR\n");}
 		;
 
-cmd:	'D' points ';'
+cmd:	DRAW points ';'
 		;
 
 points:	point
