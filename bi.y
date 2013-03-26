@@ -1,5 +1,9 @@
 %{
 	#include <stdio.h>		
+	#include <cairo.h>
+	#include <cairo-pdf.h>
+	cairo_surface_t * pdf_surface;
+	cairo_t* cr;
 %}
 
 %union {
@@ -7,15 +11,17 @@
 	double db;
 }
 
+%token DRAW
 %token NB
-%token EOL
+%token EOL EOF
 
 %%
-in:		line in
+in:		in line
 		| 
+		| EOF	{}
 		;
 
-line: 	cmd EOL
+line: 	cmd EOL	{cairo_stroke(cr);}
 		| error EOL	{printf("\nERROR\n");}
 		;
 
@@ -49,7 +55,12 @@ yyerror(char* msg){
 }
 
 int main(int argc, char *argv[]){
+	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
+	cr = cairo_create(pdf_surface);
+
 	yyparse();
+	cairo_destroy(cr);
+	cairo_surface_destroy(pdf_surface);
 
 	return 0;
 }
