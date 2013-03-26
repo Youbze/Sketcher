@@ -7,9 +7,9 @@
 	#define MAXPOINTSPARCOMMANDE 10
 
 	typedef struct {
-	int x;
-	int y;
-	int isRelative;
+		int x;
+		int y;
+		int isRelative;
 	}s_point;
 
 	cairo_surface_t * pdf_surface;
@@ -24,25 +24,23 @@
 }
 
 %type <sp> point cart pol
+%type <entier> exp
 
 %token DRAW
 %token <entier> NB
-%token EOL EOF
-
-%%
-in:		in line
 %token EOL ENDFILE
+
 
 %%
 in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
 		| 
-		| EOF
+		| EOL
 		;
 
 line: 	cmd EOL	{	
 					int i;
 					for(i=0;i<i_pts;i++)
-						cairo_line_to(cr, tab_points[i][x], tab_points[i][y]);
+						cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 					cairo_stroke(cr);
 					i_pts = 0;
 				}
@@ -57,31 +55,31 @@ points:	point 					{
 									i_pts++;	
 								}
 		| points '-''-' point 	{
-									tab_points[i_pts] = $2;
+									tab_points[i_pts] = $4;
 									i_pts++;
 								}
 		;
 
 point:	cart 					{
-									$$ = $1
+									$$ = $1;
 								}
 		| pol					{
-									$$ = $1
+									$$ = $1;
 								}
 		;
 
 cart:	'('exp','exp')'			{
 									s_point res;
-									res.x = $1;
-									res.y = $2;
+									res.x = $2;
+									res.y = $4;
 									$$ = res;
 								}
 		;
 
 pol:	'('exp':'exp')'			{
 									s_point res;
-									res.x = $2*cos($1);
-									res.y = $2*sin($1);
+									res.x = $4*cos($2);
+									res.y = $4*sin($2);
 									$$ = res;
 								}
 		;
@@ -90,16 +88,16 @@ exp:	NB						{
 									$$ = $1;
 								}
 		| '('NB'+'NB')'			{
-									$$ = $1+$2;
+									$$ = $2+$4;
 								}
 		| '('NB'-'NB')'			{
-									$$ = $1-$2;
+									$$ = $2-$4;
 								}
 		| '('NB'*'NB')'			{
-									$$ = $1*$2;
+									$$ = $2*$4;
 								}
 		| '('NB'/'NB')'			{
-									$$ = $1/$2;
+									$$ = $2/$4;
 								}
 		;
 

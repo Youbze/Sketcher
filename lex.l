@@ -1,4 +1,9 @@
 %{
+	typedef struct {
+		int x;
+		int y;
+		int isRelative;
+	}s_point;
 	#include "y.tab.h"
 %}
 
