@@ -1,5 +1,9 @@
 %{
 	#include <stdio.h>		
+	#include <cairo.h>
+	#include <cairo-pdf.h>
+	cairo_surface_t * pdf_surface;
+	cairo_t* cr;
 %}
 
 %union {
@@ -9,14 +13,19 @@
 
 %token DRAW
 %token NB
+%token EOL EOF
+
+%%
+in:		in line
 %token EOL ENDFILE
 
 %%
-in:		in line ENDFILE {printf("Hooooo noon c'est finiittttt \n"); return 0;}
+in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
 		| 
+		| EOF	{}
 		;
 
-line: 	cmd EOL
+line: 	cmd EOL	{cairo_stroke(cr);}
 		| error EOL	{printf("\nERROR\n");}
 		;
 
@@ -50,7 +59,12 @@ yyerror(char* msg){
 }
 
 int main(int argc, char *argv[]){
+	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
+	cr = cairo_create(pdf_surface);
+
 	yyparse();
+	cairo_destroy(cr);
+	cairo_surface_destroy(pdf_surface);
 
 	return 0;
 }
