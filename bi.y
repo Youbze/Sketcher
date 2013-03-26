@@ -1,23 +1,55 @@
+%{
+	#include <stdio.h>		
+%}
+
+%union {
+	int entier;
+	double db;
+}
+
+%token NB
+%token EOL
+
 %%
-in:	'\n'
-	| cmd
-cmd:	'D'points';'
+in:		line in
+		| 
 		;
+
+line: 	cmd EOL
+		| error EOL	{printf("\nERROR\n");}
+		;
+
+cmd:	'D' points ';'
+		;
+
 points:	point
-		|points'-''-'point
+		| points '-''-' point
 		;
+
 point:	cart
 		| pol
 		;
+
 cart:	'('exp','exp')'
 		;
+
 pol:	'('exp':'exp')'
 		;
-exp:	nb
-		| '('nb'+'nb')'
-		| '('nb'-'nb')'
-		| '('nb'*'nb')'
-		| '('nb'/'nb')'
+
+exp:	NB
+		| '('NB'+'NB')'
+		| '('NB'-'NB')'
+		| '('NB'*'NB')'
+		| '('NB'/'NB')'
 		;
-nb:	"bah c'est un nombre quoi..."
-	;
+
+%%
+yyerror(char* msg){
+	printf("%s\n", msg);
+}
+
+int main(int argc, char *argv[]){
+	yyparse();
+
+	return 0;
+}

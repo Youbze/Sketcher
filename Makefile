@@ -3,10 +3,10 @@ lexec: lex.yy.c
 lex.yy.c: lex.l
 	lex lex.l
 
-lexbi: lex.yy.c bi.tab.c
-	gcc -o lexbixec lex.yy.c bi.tab.c -lfl
-bi.tab.c:
-	bison -d -o bi.tab.c bi.y
+lexbi: lex.yy.c y.tab.c
+	gcc -o lexbixec lex.yy.c y.tab.c -lfl
+y.tab.c:
+	bison -d -y bi.y
 
 clean:
-	rm -f lexec lexbixec lex.yy.c bi.tab.c bi.tab.h
+	rm -f lexec lexbixec lex.yy.c y.tab.c y.tab.h
