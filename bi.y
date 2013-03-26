@@ -17,6 +17,10 @@
 
 %%
 in:		in line
+%token EOL ENDFILE
+
+%%
+in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
 		| 
 		| EOF	{}
 		;
@@ -25,7 +29,7 @@ line: 	cmd EOL	{cairo_stroke(cr);}
 		| error EOL	{printf("\nERROR\n");}
 		;
 
-cmd:	'D' points ';'
+cmd:	DRAW points ';'
 		;
 
 points:	point
