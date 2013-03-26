@@ -1,0 +1,6 @@
+.git/*
+
+lex.yy.c
+lexbixec
+y.tab.c
+y.tab.h
