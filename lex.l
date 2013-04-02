@@ -12,6 +12,7 @@
 [[:digit:]]+ {yylval.entier = atoi(yytext); return NB;}
 
 "draw"|"fill" return DRAW;
+"cycle"	return CYCLE;
 
 
 "+" return '+';

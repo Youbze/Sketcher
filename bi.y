@@ -26,7 +26,7 @@
 %type <sp> point cart pol
 %type <entier> exp
 
-%token DRAW
+%token DRAW CYCLE
 %token <entier> NB
 %token EOL ENDFILE
 
@@ -40,7 +40,13 @@ in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
 line: 	cmd EOL	{	
 					int i;
 					for(i=0;i<i_pts;i++)
-						cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+					{
+						if(tab_points[i].isRelative && i > 0)
+							cairo_line_to(cr, tab_points[i].x+tab_points[i-1].x, tab_points[i].y+tab_points[i-1].y);
+						else
+							cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+					}
+
 					cairo_stroke(cr);
 					i_pts = 0;
 				}
@@ -58,6 +64,15 @@ points:	point 					{
 									tab_points[i_pts] = $4;
 									i_pts++;
 								}
+		| points '-''-''+' point {
+									tab_points[i_pts] = $5;
+									tab_points[i_pts].isRelative = 1;
+									i_pts++;
+								}	
+		| points '-''-' CYCLE	{
+									tab_points[i_pts] = tab_points[0];
+									i_pts++;
+								}									
 		;
 
 point:	cart 					{
@@ -86,6 +101,9 @@ pol:	'('exp':'exp')'			{
 
 exp:	NB						{
 									$$ = $1;
+								}
+		| '-'NB					{
+									$$ = -$2;
 								}
 		| '('NB'+'NB')'			{
 									$$ = $2+$4;
