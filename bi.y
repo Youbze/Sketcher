@@ -33,7 +33,7 @@
 %left '-' '+' '/' '*'
 
 %%
-in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
+in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
 		| 
 		| EOL
 		;
