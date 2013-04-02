@@ -42,7 +42,11 @@ line: 	cmd EOL	{
 					for(i=0;i<i_pts;i++)
 					{
 						if(tab_points[i].isRelative && i > 0)
-							cairo_line_to(cr, tab_points[i].x+tab_points[i-1].x, tab_points[i].y+tab_points[i-1].y);
+						{
+							tab_points[i].x+=tab_points[i-1].x;
+							tab_points[i].y+=tab_points[i-1].y;
+							cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+						}
 						else
 							cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 					}
@@ -127,6 +131,7 @@ yyerror(char* msg){
 int main(int argc, char *argv[]){
 	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
 	cr = cairo_create(pdf_surface);
+	cairo_set_line_width (cr, 1.0);
 	i_pts = 0;
 	yyparse();
 	cairo_destroy(cr);
