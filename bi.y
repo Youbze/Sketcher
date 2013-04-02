@@ -30,6 +30,7 @@
 %token <entier> NB
 %token EOL ENDFILE
 
+%left '-' '+' '/' '*'
 
 %%
 in:		in line ENDFILE {printf("Hooooo noon c'est finiiiiii \n"); return 0;}
@@ -109,16 +110,16 @@ exp:	NB						{
 		| '-'NB					{
 									$$ = -$2;
 								}
-		| exp '/' NB				{
+		| exp '/' exp				{
 									$$ = $1/$3;
 								}
-		| exp '+' NB				{
+		| exp '+' exp				{
 									$$ = $1+$3;
 								}
-		| exp '*' NB				{
+		| exp '*' exp				{
 									$$ = $1*$3;
 								}
-		| exp '-' NB				{
+		| exp '-' exp				{
 									$$ = $1-$3;
 								}
 		| '('exp')'				{ $$ = $2; }
