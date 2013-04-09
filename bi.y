@@ -6,8 +6,10 @@
 	#include <cairo-pdf.h>
 	#include <string.h>
 
-	#define DOUBLE 1
-	#define INT 2
+	#define DOUBLE 	1
+	#define INT 	2
+	#define POINT 	3
+	#define CHEMIN 	4
 
 	typedef struct {
 		double x;
@@ -25,15 +27,37 @@
 		union {
 			double d_value;
 			int i_value;
+			s_point p_value;
+			s_point* c_value;
 		} value;
 		struct table *next;
 	} table;
 
 	table *var_table = NULL;
 
+	table *getvar(char* name){
+		
+		table *iter = var_table;
+
+		while(iter->next != NULL){
+			printf("HERHERHEREHREHR_n");
+			if (strcmp((char*)iter->name, (char*)name) == 0){
+				return iter;
+			}
+
+			iter = (table*) iter->next;
+		}
+
+		return NULL;
+	}
 
 	table *addvar(char* name, int type){
-		table *var = malloc(sizeof(table*));
+
+		table *var = getvar(name);
+
+		if (var == NULL)
+			var = malloc(sizeof(table));
+
 		var->type = type;
 		var->name = malloc(strlen(name) + 1);
 		strcpy(var->name,name);
@@ -44,21 +68,6 @@
 		var_table = var;
 
 		return var;
-	}
-
-	table *getvar(char* name){
-		
-		table *iter = var_table;
-
-		while(iter->next != NULL){
-			if (strcmp (iter->name,name) == 0){
-				return iter;
-			}
-
-			iter = (table*) iter->next;
-		}
-
-		return NULL;
 	}
 
 
@@ -191,7 +200,10 @@ var: T_INT STR '=' exp			{
 									table* var = addvar($2, DOUBLE);
 									var->value.d_value = $4;
 								}
-	| "point" STR '=' point
+	| "point" STR '=' point 	{
+									table* var = addvar($2, POINT);
+									var->value.p_value = $4;
+								}
 	| "chemin" STR '=' points;
 
 exp:	NB						{
@@ -231,6 +243,8 @@ yyerror(char* msg){
 int main(int argc, char *argv[]){
 
 	var_table = malloc(sizeof(table*));
+	var_table->name = NULL;
+	var_table->next = NULL;
 
 	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
 	cr = cairo_create(pdf_surface);
