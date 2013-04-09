@@ -29,13 +29,21 @@
 		struct table *next;
 	} table;
 
-	table *var_table;
+	table *var_table = NULL;
+
 
 	table *addvar(char* name, int type){
 		table *var = malloc(sizeof(table*));
 		var->type = type;
 		var->name = malloc(strlen(name) + 1);
 		strcpy(var->name,name);
+
+
+		var->next = (struct table*) var_table;
+
+		var_table = var;
+
+		return var;
 	}
 
 	table *getvar(char* name){
@@ -47,7 +55,7 @@
 				return iter;
 			}
 
-			iter = iter->next;
+			iter = (table*) iter->next;
 		}
 
 		return NULL;
@@ -76,14 +84,20 @@
 	int entier;
 	double decimal;
 	s_point sp;
+	char* str;
 }
 
 %type <sp> point cart pol
 %type <decimal> exp
 
+%token T_INT T_DOUBLE
+
 %token DRAW CYCLE
 %token <decimal> NB
+%token <str> STR
 %token EOL ENDFILE
+
+
 
 %left '-' '+' '/' '*'
 
@@ -114,6 +128,7 @@ line: 	cmd EOL	{
 		;
 
 cmd:	DRAW points ';'
+		| var ';'
 		;
 
 points:	point 					{
@@ -167,8 +182,28 @@ pol:	'('exp':'exp')'			{
 								}
 		;
 
+var: T_INT STR '=' exp			{
+									printf("Create var %s\n", $2);
+									table* var = addvar($2, INT);
+									var->value.i_value = $4;
+								}
+	| T_DOUBLE STR '=' exp		{
+									table* var = addvar($2, DOUBLE);
+									var->value.d_value = $4;
+								}
+	| "point" STR '=' point
+	| "chemin" STR '=' points;
+
 exp:	NB						{
-									$$ = $1; printf("added %f\n", $1);
+									$$ = $1;
+								}
+		| STR 					{
+									table* var = getvar($1);
+									if (var->type == INT)
+										$$ = var->value.i_value;
+									else if (var->type == DOUBLE)
+										$$ = var->value.d_value;
+
 								}
 		| '-'NB					{
 									$$ = -$2;
@@ -194,6 +229,9 @@ yyerror(char* msg){
 }
 
 int main(int argc, char *argv[]){
+
+	var_table = malloc(sizeof(table*));
+
 	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
 	cr = cairo_create(pdf_surface);
 	cairo_set_line_width (cr, 1.0);

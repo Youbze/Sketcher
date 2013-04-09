@@ -15,6 +15,11 @@
 "draw"|"fill" return DRAW;
 "cycle"	return CYCLE;
 
+"int" return T_INT;
+"double" return T_DOUBLE;
+
+[a-z]+ {yylval.str = strdup(yytext); return STR;}
+
 
 "+" return '+';
 "*" return '*';
@@ -25,6 +30,7 @@
 ":" return ':';
 "," return ',';
 ";" return ';';
+"=" return '=';
 \n return EOL;
 
 " " {}
