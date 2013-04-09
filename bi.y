@@ -4,11 +4,43 @@
 	#include <math.h>
 	#include <cairo.h>
 	#include <cairo-pdf.h>
+	#include <string.h>
+
+	#define DOUBLE 1
+	#define INT 2
+
 	typedef struct {
 		int x;
 		int y;
 		int isRelative;
 	}s_point;
+
+	/*
+	* Table contenant les variables crees par l'utilisateur
+	*/
+
+	typedef struct {
+		char *name;
+		int type; // DOUBLE or INT
+		union {
+			double d_value;
+			int i_value;
+		} value;
+		struct table *next;
+	} table;
+
+	table *var_table;
+
+	table *addvar(char* name, int type){
+		table *var = malloc(sizeof(table*));
+		var->type = type;
+		var->name = malloc(strlen(name) + 1);
+		strcpy(var->name,name);
+	}
+
+	table *getvar();
+
+
 
 	cairo_surface_t * pdf_surface;
 	cairo_t* cr;
@@ -29,14 +61,15 @@
 
 %union {
 	int entier;
+	double decimal;
 	s_point sp;
 }
 
 %type <sp> point cart pol
-%type <entier> exp
+%type <decimal> exp
 
 %token DRAW CYCLE
-%token <entier> NB
+%token <decimal> NB
 %token EOL ENDFILE
 
 %left '-' '+' '/' '*'

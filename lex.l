@@ -10,6 +10,7 @@
 %%
 
 [[:digit:]]+ {yylval.entier = atoi(yytext); return NB;}
+[[:digit:]]+\.[[:digit:]]+ {yylval.decimal = atof(yytext); return NB;}
 
 "draw"|"fill" return DRAW;
 "cycle"	return CYCLE;
