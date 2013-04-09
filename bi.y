@@ -10,8 +10,8 @@
 	#define INT 2
 
 	typedef struct {
-		int x;
-		int y;
+		double x;
+		double y;
 		int isRelative;
 	}s_point;
 
@@ -38,7 +38,20 @@
 		strcpy(var->name,name);
 	}
 
-	table *getvar();
+	table *getvar(char* name){
+		
+		table *iter = var_table;
+
+		while(iter->next != NULL){
+			if (strcmp (iter->name,name) == 0){
+				return iter;
+			}
+
+			iter = iter->next;
+		}
+
+		return NULL;
+	}
 
 
 
@@ -155,7 +168,7 @@ pol:	'('exp':'exp')'			{
 		;
 
 exp:	NB						{
-									$$ = $1;
+									$$ = $1; printf("added %f\n", $1);
 								}
 		| '-'NB					{
 									$$ = -$2;
