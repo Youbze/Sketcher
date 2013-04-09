@@ -40,7 +40,7 @@
 		table *iter = var_table;
 
 		while(iter->next != NULL){
-			printf("HERHERHEREHREHR_n");
+			printf("HERHERHEREHREHR\n");
 			if (strcmp((char*)iter->name, (char*)name) == 0){
 				return iter;
 			}
@@ -144,12 +144,14 @@ points:	point 					{
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $1;
+									tab_points[i_pts].isRelative = 0;
 									i_pts++;	
 								}
 		| points '-''-' point 	{
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $4;
+									tab_points[i_pts].isRelative = 0;
 									i_pts++;
 								}
 		| points '-''-''+' point {
