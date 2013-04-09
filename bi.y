@@ -1,11 +1,9 @@
 %{
+	#include <stdlib.h>
 	#include <stdio.h>		
 	#include <math.h>
 	#include <cairo.h>
 	#include <cairo-pdf.h>
-
-	#define MAXPOINTSPARCOMMANDE 10
-
 	typedef struct {
 		int x;
 		int y;
@@ -14,8 +12,19 @@
 
 	cairo_surface_t * pdf_surface;
 	cairo_t* cr;
-	s_point tab_points[MAXPOINTSPARCOMMANDE];
+	s_point *tab_points;
 	int i_pts;
+	int tab_size;
+
+	void extend_tab()
+	{
+		s_point *tmp = malloc(2*tab_size*sizeof(s_point));
+		int i;
+		for(i=0;i<tab_size;i++)
+			tmp[i] = tab_points[i];
+		free(tab_points);
+		tab_points = tmp;
+	}
 %}
 
 %union {
@@ -62,19 +71,27 @@ cmd:	DRAW points ';'
 		;
 
 points:	point 					{
+									if(i_pts == tab_size)
+										extend_tab();
 									tab_points[i_pts] = $1;
 									i_pts++;	
 								}
 		| points '-''-' point 	{
+									if(i_pts == tab_size)
+										extend_tab();
 									tab_points[i_pts] = $4;
 									i_pts++;
 								}
 		| points '-''-''+' point {
+									if(i_pts == tab_size)
+										extend_tab();
 									tab_points[i_pts] = $5;
 									tab_points[i_pts].isRelative = 1;
 									i_pts++;
 								}	
 		| points '-''-' CYCLE	{
+									if(i_pts == tab_size)
+										extend_tab();
 									tab_points[i_pts] = tab_points[0];
 									i_pts++;
 								}									
@@ -135,6 +152,8 @@ int main(int argc, char *argv[]){
 	cr = cairo_create(pdf_surface);
 	cairo_set_line_width (cr, 1.0);
 	i_pts = 0;
+	tab_size = 10;
+	tab_points = malloc(10*sizeof(s_point));
 	yyparse();
 	cairo_destroy(cr);
 	cairo_surface_destroy(pdf_surface);
