@@ -21,7 +21,7 @@
 	* Table contenant les variables crees par l'utilisateur
 	*/
 
-	typedef struct {
+	struct s_table{
 		char *name;
 		int type; // DOUBLE or INT
 		union {
@@ -30,8 +30,10 @@
 			s_point p_value;
 			s_point* c_value;
 		} value;
-		struct table *next;
-	} table;
+		struct s_table *next;
+	};
+
+	typedef struct s_table table;
 
 	table *var_table = NULL;
 
@@ -63,7 +65,7 @@
 		strcpy(var->name,name);
 
 
-		var->next = (struct table*) var_table;
+		var->next = (table*) var_table;
 
 		var_table = var;
 
