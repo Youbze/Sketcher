@@ -173,6 +173,11 @@ point:	cart 					{
 		| CYCLE					{
 									$$ = tab_points[0];
 								}
+		| STR					{
+									table* var = getvar($1);
+									if (var->type == POINT)
+										$$ = var->value.p_value;
+								}
 		;
 
 cart:	'('exp','exp')'			{
