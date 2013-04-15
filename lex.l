@@ -17,6 +17,7 @@
 
 "int" return T_INT;
 "double" return T_DOUBLE;
+"point" return T_POINT;
 
 [a-z]+ {yylval.str = strdup(yytext); return STR;}
 

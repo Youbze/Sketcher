@@ -23,7 +23,7 @@
 
 	struct s_table{
 		char *name;
-		int type; // DOUBLE or INT
+		int type;
 		union {
 			double d_value;
 			int i_value;
@@ -100,7 +100,7 @@
 %type <sp> point cart pol
 %type <decimal> exp
 
-%token T_INT T_DOUBLE
+%token T_INT T_DOUBLE T_POINT
 
 %token DRAW CYCLE
 %token <decimal> NB
@@ -162,12 +162,6 @@ points:	point 					{
 									tab_points[i_pts].isRelative = 1;
 									i_pts++;
 								}	
-		| points '-''-' CYCLE	{
-									if(i_pts == tab_size)
-										extend_tab();
-									tab_points[i_pts] = tab_points[0];
-									i_pts++;
-								}									
 		;
 
 point:	cart 					{
@@ -175,6 +169,9 @@ point:	cart 					{
 								}
 		| pol					{
 									$$ = $1;
+								}
+		| CYCLE					{
+									$$ = tab_points[0];
 								}
 		;
 
@@ -195,7 +192,6 @@ pol:	'('exp':'exp')'			{
 		;
 
 var: T_INT STR '=' exp			{
-									printf("Create var %s\n", $2);
 									table* var = addvar($2, INT);
 									var->value.i_value = $4;
 								}
@@ -203,7 +199,8 @@ var: T_INT STR '=' exp			{
 									table* var = addvar($2, DOUBLE);
 									var->value.d_value = $4;
 								}
-	| "point" STR '=' point 	{
+	| T_POINT STR '=' point 	{
+									printf("Create var %s\n", $2);
 									table* var = addvar($2, POINT);
 									var->value.p_value = $4;
 								}
