@@ -42,7 +42,6 @@
 		table *iter = var_table;
 
 		while(iter->next != NULL){
-			printf("HERHERHEREHREHR\n");
 			if (strcmp((char*)iter->name, (char*)name) == 0){
 				return iter;
 			}
