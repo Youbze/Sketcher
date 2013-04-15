@@ -1,5 +1,7 @@
-lexec: lex.yy.c
-	gcc -o lexec lex.yy.c -lfl
+all: lexbi spirale
+
+spirale: spirale.c
+	gcc -o spirale spirale.c
 
 lex.yy.c: lex.l
 	lex lex.l
