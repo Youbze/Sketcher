@@ -9,7 +9,7 @@
 	#define DOUBLE 	1
 	#define INT 	2
 	#define POINT 	3
-	#define CHEMIN 	4
+	#define PATH 	4
 
 	typedef struct {
 		double x;
@@ -41,7 +41,7 @@
 		
 		table *iter = var_table;
 
-		while(iter->next != NULL){
+		while(iter != NULL){
 			if (strcmp((char*)iter->name, (char*)name) == 0){
 				return iter;
 			}
@@ -60,7 +60,7 @@
 			var = malloc(sizeof(table));
 
 		var->type = type;
-		var->name = malloc(strlen(name) + 1);
+		var->name = malloc((strlen(name) + 1)*sizeof(char));
 		strcpy(var->name,name);
 
 
@@ -88,6 +88,21 @@
 		free(tab_points);
 		tab_points = tmp;
 	}
+
+	freee()
+	{
+		table *iter = var_table;
+		table *tmp;
+		while(iter != NULL){
+			if (iter->type == PATH)
+				free(iter->value.c_value);
+			tmp = iter;
+			iter = (table*) iter->next;
+			free(tmp);
+		}
+		free(tab_points);
+		free(var_table);
+	}
 %}
 
 %union {
@@ -100,7 +115,7 @@
 %type <sp> point cart pol
 %type <decimal> exp
 
-%token T_INT T_DOUBLE T_POINT
+%token T_INT T_DOUBLE T_POINT T_PATH
 
 %token DRAW CYCLE
 %token <decimal> NB
@@ -205,11 +220,18 @@ var: T_INT STR '=' exp			{
 									var->value.d_value = $4;
 								}
 	| T_POINT STR '=' point 	{
-									printf("Create var %s\n", $2);
 									table* var = addvar($2, POINT);
 									var->value.p_value = $4;
 								}
-	| "chemin" STR '=' points;
+	| T_PATH STR '=' points		{
+									table* var = addvar($2, PATH);
+									s_point *tmp = malloc(i_pts*sizeof(s_point));
+									int i;
+									for(i=0;i<i_pts;i++)
+										tmp[i] = tab_points[i];
+									var->value.c_value = tmp;
+								}
+	;
 
 exp:	NB						{
 									$$ = $1;
@@ -260,6 +282,6 @@ int main(int argc, char *argv[]){
 	yyparse();
 	cairo_destroy(cr);
 	cairo_surface_destroy(pdf_surface);
-
+	freee();
 	return 0;
 }

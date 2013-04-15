@@ -18,6 +18,7 @@
 "int" return T_INT;
 "double" return T_DOUBLE;
 "point" return T_POINT;
+"path"	return T_PATH;
 
 ([a-z]|[A-Z])+ {yylval.str = strdup(yytext); return STR;}
 
