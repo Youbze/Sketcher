@@ -25,6 +25,8 @@
 
 "+" return '+';
 "*" return '*';
+"--" return SEPARATOR;
+"--+" return SEPARATOR2;
 "-" return '-';
 "/" return '/';
 "(" return '(';

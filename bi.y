@@ -5,6 +5,7 @@
 	#include <cairo.h>
 	#include <cairo-pdf.h>
 	#include <string.h>
+	#include <assert.h>
 
 	#define DOUBLE 	1
 	#define INT 	2
@@ -40,9 +41,9 @@
 	table *getvar(char* name){
 		
 		table *iter = var_table;
-
+		
 		while(iter != NULL){
-			if (strcmp((char*)iter->name, (char*)name) == 0){
+			if (strcmp(iter->name, name) == 0){
 				return iter;
 			}
 
@@ -122,9 +123,9 @@
 %token <str> STR
 %token EOL ENDFILE
 
+%token SEPARATOR SEPARATOR2
 
-
-%left '-' '+' '/' '*'
+%left '-' '+' '/' '*' SEPARATOR SEPARATOR2
 
 %%
 in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
@@ -163,20 +164,20 @@ points:	point 					{
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;	
 								}
-		| points '-''-' point 	{
+		| points SEPARATOR point 	{
 									if(i_pts == tab_size)
 										extend_tab();
-									tab_points[i_pts] = $4;
+									tab_points[i_pts] = $3;
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;
 								}
-		| points '-''-''+' point {
+		| points SEPARATOR2 point {
 									if(i_pts == tab_size)
 										extend_tab();
-									tab_points[i_pts] = $5;
+									tab_points[i_pts] = $3;
 									tab_points[i_pts].isRelative = 1;
 									i_pts++;
-								}	
+								}					
 		;
 
 point:	cart 					{
@@ -196,6 +197,7 @@ point:	cart 					{
 		;
 
 cart:	'('exp','exp')'			{
+									printf("Point(%f,%f)\n", $2, $4);
 									s_point res;
 									res.x = $2;
 									res.y = $4;
@@ -268,10 +270,6 @@ yyerror(char* msg){
 }
 
 int main(int argc, char *argv[]){
-
-	var_table = malloc(sizeof(table*));
-	var_table->name = NULL;
-	var_table->next = NULL;
 
 	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
 	cr = cairo_create(pdf_surface);

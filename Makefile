@@ -7,7 +7,7 @@ lex.yy.c: lex.l
 	lex lex.l
 
 lexbi: lex.yy.c y.tab.c
-	gcc -o lexbixec lex.yy.c y.tab.c -lfl -lm `pkg-config --cflags --libs cairo`
+	gcc -g -o lexbixec lex.yy.c y.tab.c -lfl -lm `pkg-config --cflags --libs cairo`
 
 lexbee: lex.yy.c y.tab.c
 	gcc -o lexbixec lex.yy.c y.tab.c -lfl -lm -lpixman-1 `pkg-config --cflags --libs cairo`
