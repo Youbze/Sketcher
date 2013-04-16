@@ -124,6 +124,7 @@
 %token EOL ENDFILE
 
 %token SEPARATOR SEPARATOR2
+%token ROTATE
 
 %left '-' '+' '/' '*' SEPARATOR SEPARATOR2
 
@@ -155,6 +156,35 @@ line: 	cmd EOL	{
 
 cmd:	DRAW points ';'
 		| var ';'
+		| function ';'
+		;
+
+function: ROTATE '(' STR ',' point ',' NB ')' {
+												table* var = getvar($3);
+												s_point centre = $5;
+												printf("TYPE = %i\n", var->type);
+												if (var->type == POINT){
+													double x2 = var->value.p_value.x;
+													double y2 = var->value.p_value.y;
+													double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
+													var->value.p_value.x = d * cos($7) + centre.x; 
+													var->value.p_value.y = d * sin($7) + centre.y; 
+													printf("Move point to (%f,%f)\n", var->value.p_value.x, var->value.p_value.y);
+												}else if (var->type == PATH){	
+													printf("sizeof(tab_pon = %d\n", sizeof(s_point));
+													printf("i_pts = %i\n", sizeof(*tab_points));											
+													int i;
+													for(i=0;i<i_pts;i++){
+														double x2 = tab_points[i].x;
+														double y2 = tab_points[i].y;
+														double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
+														tab_points[i].x = d * cos($7) + centre.x; 
+														tab_points[i].y = d * sin($7) + centre.y;  
+														printf("Move point to (%f,%f)\n", tab_points[i].x, tab_points[i].y);
+													}
+												}
+	
+												}
 		;
 
 points:	point 					{
@@ -229,6 +259,7 @@ var: T_INT STR '=' exp			{
 									table* var = addvar($2, PATH);
 									s_point *tmp = malloc(i_pts*sizeof(s_point));
 									int i;
+									printf("i_pts = %i\n", i_pts);
 									for(i=0;i<i_pts;i++)
 										tmp[i] = tab_points[i];
 									var->value.c_value = tmp;
@@ -271,7 +302,7 @@ yyerror(char* msg){
 
 int main(int argc, char *argv[]){
 
-	pdf_surface = cairo_pdf_surface_create("out.pdf", 100, 100);
+	pdf_surface = cairo_pdf_surface_create("out.pdf", 250, 250);
 	cr = cairo_create(pdf_surface);
 	cairo_set_line_width (cr, 1.0);
 	i_pts = 0;

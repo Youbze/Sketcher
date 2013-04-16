@@ -15,6 +15,8 @@
 "draw"|"fill" return DRAW;
 "cycle"	return CYCLE;
 
+"rotate" return ROTATE;
+
 "int" return T_INT;
 "double" return T_DOUBLE;
 "point" return T_POINT;
