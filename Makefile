@@ -10,7 +10,7 @@ lexbi: lex.yy.c y.tab.c
 	gcc -g -o lexbixec lex.yy.c y.tab.c -lfl -lm `pkg-config --cflags --libs cairo`
 
 lexbee: lex.yy.c y.tab.c
-	gcc -o lexbixec lex.yy.c y.tab.c -lfl -lm -lpixman-1 `pkg-config --cflags --libs cairo`
+	gcc -g -o lexbixec lex.yy.c y.tab.c -lfl -lm -lpixman-1 `pkg-config --cflags --libs cairo`
 
 y.tab.c:
 	bison -d -y bi.y

@@ -102,7 +102,6 @@
 			free(tmp);
 		}
 		free(tab_points);
-		free(var_table);
 	}
 %}
 
@@ -309,8 +308,8 @@ int main(int argc, char *argv[]){
 	tab_size = 10;
 	tab_points = malloc(10*sizeof(s_point));
 	yyparse();
+	freee();
 	cairo_destroy(cr);
 	cairo_surface_destroy(pdf_surface);
-	freee();
 	return 0;
 }
