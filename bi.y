@@ -141,10 +141,8 @@ line: 	cmd EOL	{
 						{
 							tab_points[i].x+=tab_points[i-1].x;
 							tab_points[i].y+=tab_points[i-1].y;
-							cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 						}
-						else
-							cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+						cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 					}
 
 					cairo_stroke(cr);
