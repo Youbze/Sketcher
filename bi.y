@@ -159,7 +159,7 @@ cmd:	DRAW points ';' {
 		| function ';'
 		;
 
-function: ROTATE '(' STR ',' point ',' NB ')' {
+function: ROTATE '(' STR ',' point ',' exp ')' {
 												table* var = getvar($3);
 												s_point centre = $5;
 												printf("TYPE = %i\n", var->type);
@@ -184,10 +184,13 @@ function: ROTATE '(' STR ',' point ',' NB ')' {
 														printf("centre y = %f\n", centre.y);
 														double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
 														printf("d = %f\n", d);
-														tab_points[i].x = d * cos($7) + centre.x; 
-														tab_points[i].y = d * sin($7) + centre.y;  
+														tab_points[i].x = centre.x + (x2-centre.x) * cos($7) - (y2-centre.y) * sin($7); 
+														tab_points[i].y = centre.y + (x2-centre.x) * sin($7) + (y2-centre.y) * cos($7);   
 														printf("Move point to (%f,%f)\n", tab_points[i].x, tab_points[i].y);
+														cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 													}
+													
+													cairo_stroke(cr);
 												}
 	
 												}
