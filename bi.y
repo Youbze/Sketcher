@@ -31,6 +31,7 @@
 			s_point p_value;
 			s_point* c_value;
 		} value;
+		int size;
 		struct s_table *next;
 	};
 
@@ -63,6 +64,7 @@
 		var->type = type;
 		var->name = malloc((strlen(name) + 1)*sizeof(char));
 		strcpy(var->name,name);
+		var->size = 0;
 
 
 		var->next = (table*) var_table;
@@ -133,10 +135,15 @@ in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
 		| EOL
 		;
 
-line: 	cmd EOL	{	
+line: 	cmd EOL	
+		| error EOL	{printf("\nERROR\n");}
+		;
+
+cmd:	DRAW points ';' {	
 					int i;
 					for(i=0;i<i_pts;i++)
 					{
+						printf("redraw\n");
 						if(tab_points[i].isRelative && i > 0)
 						{
 							tab_points[i].x+=tab_points[i-1].x;
@@ -148,10 +155,6 @@ line: 	cmd EOL	{
 					cairo_stroke(cr);
 					i_pts = 0;
 				}
-		| error EOL	{printf("\nERROR\n");}
-		;
-
-cmd:	DRAW points ';'
 		| var ';'
 		| function ';'
 		;
@@ -168,13 +171,19 @@ function: ROTATE '(' STR ',' point ',' NB ')' {
 													var->value.p_value.y = d * sin($7) + centre.y; 
 													printf("Move point to (%f,%f)\n", var->value.p_value.x, var->value.p_value.y);
 												}else if (var->type == PATH){	
-													printf("sizeof(tab_pon = %d\n", sizeof(s_point));
-													printf("i_pts = %i\n", sizeof(*tab_points));											
+													printf("taille point = %d\n", var->size);											
 													int i;
-													for(i=0;i<i_pts;i++){
+													for(i=0;i<var->size;i++){
+														printf("i = %d \n",i);
 														double x2 = tab_points[i].x;
+														printf("x = %f\n", x2);
 														double y2 = tab_points[i].y;
+														printf("y = %f\n", y2);
+														
+														printf("centre x = %f\n", centre.x);
+														printf("centre y = %f\n", centre.y);
 														double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
+														printf("d = %f\n", d);
 														tab_points[i].x = d * cos($7) + centre.x; 
 														tab_points[i].y = d * sin($7) + centre.y;  
 														printf("Move point to (%f,%f)\n", tab_points[i].x, tab_points[i].y);
@@ -243,14 +252,17 @@ pol:	'('exp':'exp')'			{
 var: T_INT STR '=' exp			{
 									table* var = addvar($2, INT);
 									var->value.i_value = $4;
+									var->size = 1;
 								}
 	| T_DOUBLE STR '=' exp		{
 									table* var = addvar($2, DOUBLE);
 									var->value.d_value = $4;
+									var->size = 1;
 								}
 	| T_POINT STR '=' point 	{
 									table* var = addvar($2, POINT);
 									var->value.p_value = $4;
+									var->size = 1;
 								}
 	| T_PATH STR '=' points		{
 									table* var = addvar($2, PATH);
@@ -260,6 +272,7 @@ var: T_INT STR '=' exp			{
 									for(i=0;i<i_pts;i++)
 										tmp[i] = tab_points[i];
 									var->value.c_value = tmp;
+									var->size = i_pts;	
 								}
 	;
 
