@@ -1,8 +1,11 @@
-all: lexbi spirale
+all: lexbi spirale testRotate
 
 spirale: spirale.c
 	gcc -o spirale spirale.c
 
+testRotate: testRotate.c
+	gcc -o testRotate testRotate.c
+	
 lex.yy.c: lex.l
 	lex lex.l
 

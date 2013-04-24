@@ -103,7 +103,7 @@
 			iter = (table*) iter->next;
 			free(tmp);
 		}
-		free(tab_points);
+		//free(tab_points);
 	}
 %}
 
