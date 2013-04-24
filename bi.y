@@ -164,8 +164,8 @@ function: ROTATE '(' STR ',' point ',' NB ')' {
 													double x2 = var->value.p_value.x;
 													double y2 = var->value.p_value.y;
 													double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
-													var->value.p_value.x = d * cos($7) + centre.x; 
-													var->value.p_value.y = d * sin($7) + centre.y; 
+													var->value.p_value.x = centre.x + (x2-centre.x) * cos($7) - (y2-centre.y) * sin($7); 
+													var->value.p_value.y = centre.y + (x2-centre.x) * sin($7) + (y2-centre.y) * cos($7); 
 													printf("Move point to (%f,%f)\n", var->value.p_value.x, var->value.p_value.y);
 												}else if (var->type == PATH){	
 													printf("sizeof(tab_pon = %d\n", sizeof(s_point));
