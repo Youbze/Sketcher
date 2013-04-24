@@ -117,7 +117,7 @@
 %type <sp> point cart pol
 %type <decimal> exp
 
-%token T_INT T_DOUBLE T_POINT T_PATH
+%token T_INT T_DOUBLE T_POINT T_PATH PI
 
 %token DRAW CYCLE
 %token <decimal> NB
@@ -125,7 +125,7 @@
 %token EOL ENDFILE
 
 %token SEPARATOR SEPARATOR2
-%token ROTATE
+%token ROTATE TRANSLATE
 
 %left '-' '+' '/' '*' SEPARATOR SEPARATOR2
 
@@ -143,7 +143,6 @@ cmd:	DRAW points ';' {
 					int i;
 					for(i=0;i<i_pts;i++)
 					{
-						printf("redraw\n");
 						if(tab_points[i].isRelative && i > 0)
 						{
 							tab_points[i].x+=tab_points[i-1].x;
@@ -162,38 +161,53 @@ cmd:	DRAW points ';' {
 function: ROTATE '(' STR ',' point ',' exp ')' {
 												table* var = getvar($3);
 												s_point centre = $5;
-												printf("TYPE = %i\n", var->type);
 												if (var->type == POINT){
 													double x2 = var->value.p_value.x;
 													double y2 = var->value.p_value.y;
 													double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
 													var->value.p_value.x = centre.x + (x2-centre.x) * cos($7) - (y2-centre.y) * sin($7); 
 													var->value.p_value.y = centre.y + (x2-centre.x) * sin($7) + (y2-centre.y) * cos($7); 
-													printf("Move point to (%f,%f)\n", var->value.p_value.x, var->value.p_value.y);
-												}else if (var->type == PATH){	
-													printf("taille point = %d\n", var->size);											
+												}else if (var->type == PATH){												
 													int i;
+													/*
+													 * Rotation d'un chemin
+													 * Puis dessine le nouveau chemin
+													 */ 
 													for(i=0;i<var->size;i++){
-														printf("i = %d \n",i);
 														double x2 = tab_points[i].x;
-														printf("x = %f\n", x2);
 														double y2 = tab_points[i].y;
-														printf("y = %f\n", y2);
-														
-														printf("centre x = %f\n", centre.x);
-														printf("centre y = %f\n", centre.y);
 														double d = sqrt((centre.x - x2) * (centre.x - x2) + (centre.y - y2) * (centre.y - y2));
-														printf("d = %f\n", d);
 														tab_points[i].x = centre.x + (x2-centre.x) * cos($7) - (y2-centre.y) * sin($7); 
 														tab_points[i].y = centre.y + (x2-centre.x) * sin($7) + (y2-centre.y) * cos($7);   
-														printf("Move point to (%f,%f)\n", tab_points[i].x, tab_points[i].y);
 														cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
 													}
 													
 													cairo_stroke(cr);
 												}
-	
 												}
+			|									
+			TRANSLATE '(' STR ',' point ')' {
+												table* var = getvar($3);
+												if (var->type == POINT){
+													double x2 = var->value.p_value.x;
+													double y2 = var->value.p_value.y;
+													var->value.p_value.x += $5.x;
+													var->value.p_value.y += $5.y;
+												}else if (var->type == PATH){												
+													int i;
+													/*
+													 * Translation d'un chemin
+													 * Puis dessine le nouveau chemin
+													 */ 
+													for(i=0;i<var->size;i++){
+														tab_points[i].x += $5.x;
+														tab_points[i].y += $5.y;   
+														cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+													}
+													
+													cairo_stroke(cr);
+												}
+												}							
 		;
 
 points:	point 					{
@@ -236,7 +250,6 @@ point:	cart 					{
 		;
 
 cart:	'('exp','exp')'			{
-									printf("Point(%f,%f)\n", $2, $4);
 									s_point res;
 									res.x = $2;
 									res.y = $4;
@@ -271,13 +284,12 @@ var: T_INT STR '=' exp			{
 									table* var = addvar($2, PATH);
 									s_point *tmp = malloc(i_pts*sizeof(s_point));
 									int i;
-									printf("i_pts = %i\n", i_pts);
 									for(i=0;i<i_pts;i++)
 										tmp[i] = tab_points[i];
 									var->value.c_value = tmp;
 									var->size = i_pts;	
 								}
-	;
+	;	
 
 exp:	NB						{
 									$$ = $1;
@@ -289,6 +301,9 @@ exp:	NB						{
 									else if (var->type == DOUBLE)
 										$$ = var->value.d_value;
 
+								}
+		| PI					{
+									$$ = M_PI;
 								}
 		| '-'NB					{
 									$$ = -$2;

@@ -16,11 +16,14 @@
 "cycle"	return CYCLE;
 
 "rotate" return ROTATE;
+"translate" return TRANSLATE;
 
 "int" return T_INT;
 "double" return T_DOUBLE;
 "point" return T_POINT;
 "path"	return T_PATH;
+
+"PI"|"pi" return PI;
 
 ([a-z]|[A-Z])+ {yylval.str = strdup(yytext); return STR;}
 
