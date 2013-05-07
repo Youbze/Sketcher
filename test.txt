@@ -1,0 +1,31 @@
+Ligne brisé : 
+
+Rajouter un test en coordonnées polaires
+
+draw (0,10)--(10,10)--((10+10)/3,(10+10)/3); OK
+
+int a = 10;
+int b = 20;
+int c = 50;
+draw (0,a)--(c/2,c/2)--(b*a,b*a); OK
+
+draw; //syntax error => OK
+
+Chemins fermés:
+
+draw (10,10)--(10,20)--(20,20)--(20,10)--cycle; OK
+
+draw (10,10)--+(0,10)--+(10,0)--+(0,-10)--cycle; OK
+
+draw +(10,10);//syntax error => OK
+
+Variables : 
+
+int a = 10;
+point b = (50,50);
+path c = (20,20)--(45,60)--(100,34);
+double d = PI;
+draw c--(a,a)--b;
+
+Transformations:
+
