@@ -1,4 +1,4 @@
-Ligne brisé : 
+Lignes brisées : 
 
 Rajouter un test en coordonnées polaires
 
@@ -11,7 +11,11 @@ draw (0,a)--(c/2,c/2)--(b*a,b*a); OK
 
 draw; //syntax error => OK
 
-Chemins fermés:
+Coordonnées relatives :
+
+./spirale | ./lexbixec
+
+Chemins fermés :
 
 draw (10,10)--(10,20)--(20,20)--(20,10)--cycle; OK
 
@@ -27,5 +31,8 @@ path c = (20,20)--(45,60)--(100,34);
 double d = PI;
 draw c--(a,a)--b;
 
-Transformations:
+Transformations :
 
+./testRotate | ./lexbixec
+
+./testTranslate | ./lexbixec
