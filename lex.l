@@ -4,6 +4,7 @@
 		int y;
 		int isRelative;
 	}s_point;
+	
 	#include "y.tab.h"
 %}
 

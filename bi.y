@@ -34,6 +34,8 @@
 		int size;
 		struct s_table *next;
 	};
+	
+	int varMode = 0;
 
 	typedef struct s_table table;
 
@@ -65,7 +67,6 @@
 		var->name = malloc((strlen(name) + 1)*sizeof(char));
 		strcpy(var->name,name);
 		var->size = 0;
-
 
 		var->next = (table*) var_table;
 
@@ -128,6 +129,7 @@
 %token ROTATE TRANSLATE
 
 %left '-' '+' '/' '*' SEPARATOR SEPARATOR2
+%right STR	
 
 %%
 in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
@@ -139,10 +141,17 @@ line: 	cmd EOL
 		| error EOL	{printf("\nERROR\n");}
 		;
 
-cmd:	DRAW points ';' {	
+cmd:	draw
+		| var ';'
+		| function ';'
+		;
+
+draw:	DRAW points ';' {	
 					int i;
+					printf("size i_pts = %d\n", i_pts);
 					for(i=0;i<i_pts;i++)
 					{
+						printf("PT(%f,%f)\n",tab_points[i].x ,tab_points[i].y);
 						if(tab_points[i].isRelative && i > 0)
 						{
 							tab_points[i].x+=tab_points[i-1].x;
@@ -154,8 +163,6 @@ cmd:	DRAW points ';' {
 					cairo_stroke(cr);
 					i_pts = 0;
 				}
-		| var ';'
-		| function ';'
 		;
 
 function: ROTATE '(' STR ',' point ',' exp ')' {
@@ -211,20 +218,26 @@ function: ROTATE '(' STR ',' point ',' exp ')' {
 		;
 
 points:	point 					{
+									if (varMode==0){
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $1;
 									tab_points[i_pts].isRelative = 0;
-									i_pts++;	
+									i_pts++;
+									printf("point i++\n");	
+									}
 								}
 		| points SEPARATOR point 	{
+									//Coordonnees absolues
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;
+									printf("points SEP point i++\n");	
 								}
 		| points SEPARATOR2 point {
+									//Coordonnees relatives
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
@@ -246,6 +259,8 @@ point:	cart 					{
 									table* var = getvar($1);
 									if (var->type == POINT)
 										$$ = var->value.p_value;
+									else if (var->type == PATH)
+										varMode = 1;
 								}
 		;
 
