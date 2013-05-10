@@ -38,7 +38,7 @@
 	typedef struct s_table table;
 
 	table *var_table = NULL;
-
+	
 	table *getvar(char* name){
 		
 		table *iter = var_table;
@@ -296,8 +296,10 @@ exp:	NB						{
 								}
 		| STR 					{
 									table* var = getvar($1);
-									if (var->type == INT)
-										$$ = var->value.i_value;
+									if (var == NULL){
+										printf("Var `%s` doesn't exists\n", $1); YYABORT; }
+									else if (var->type == INT)
+										$$ = var->value.i_value; 
 									else if (var->type == DOUBLE)
 										$$ = var->value.d_value;
 
