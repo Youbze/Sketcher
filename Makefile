@@ -23,4 +23,4 @@ y.tab.c:
 	bison -d -y bi.y
 
 clean:
-	rm -f lexec lexbixec lex.yy.c y.tab.c y.tab.h
+	rm -f lexec lexbixec lex.yy.c y.tab.c y.tab.h testRotate testTranslate papillon spirale
