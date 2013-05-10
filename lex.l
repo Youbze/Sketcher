@@ -31,7 +31,7 @@
 "+" return '+';
 "*" return '*';
 "--" return SEPARATOR;
-"--+" return SEPARATOR2;
+"--+" return RELATIVE_SEPARATOR;
 "-" return '-';
 "/" return '/';
 "(" return '(';

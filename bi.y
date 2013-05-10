@@ -124,10 +124,10 @@
 %token <str> STR
 %token EOL ENDFILE
 
-%token SEPARATOR SEPARATOR2
+%token SEPARATOR RELATIVE_SEPARATOR
 %token ROTATE TRANSLATE
 
-%left '-' '+' '/' '*' SEPARATOR SEPARATOR2
+%left '-' '+' '/' '*' SEPARATOR RELATIVE_SEPARATOR
 
 %%
 in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
@@ -224,7 +224,7 @@ points:	point 					{
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;
 								}
-		| points SEPARATOR2 point {
+		| points RELATIVE_SEPARATOR point {
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
