@@ -13,7 +13,8 @@
 [[:digit:]]+ {yylval.decimal = atof(yytext); return NB;}
 [[:digit:]]+\.[[:digit:]]+ {printf("Add val %f\n", atof(yytext)); yylval.decimal = atof(yytext); return NB;}
 
-"draw"|"fill" return DRAW;
+"draw" return DRAW;
+"fill" return FILL;
 "cycle"	return CYCLE;
 
 "rotate" return ROTATE;

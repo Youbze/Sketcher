@@ -126,7 +126,7 @@
 
 %token T_INT T_DOUBLE T_POINT T_PATH PI
 
-%token DRAW CYCLE
+%token DRAW FILL CYCLE
 %token <decimal> NB
 %token <str> STR
 %token EOL ENDFILE
@@ -159,6 +159,21 @@ cmd:	DRAW points ';' {																// Une commande de dessin simple avec une 
 					}
 
 					cairo_stroke(cr);
+					i_pts = 0;
+				}
+		| FILL points ';' {																// Une commande de dessin simple avec une liste de points
+					int i;
+					for(i=0;i<i_pts;i++)
+					{
+						if(tab_points[i].isRelative && i > 0)
+						{
+							tab_points[i].x+=tab_points[i-1].x;
+							tab_points[i].y+=tab_points[i-1].y;
+						}
+						cairo_line_to(cr, tab_points[i].x, tab_points[i].y);
+					}
+
+					cairo_fill(cr);
 					i_pts = 0;
 				}
 		| var ';'																		// Ou une déclaration de variable
