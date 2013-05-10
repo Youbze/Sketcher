@@ -12,20 +12,17 @@
 	#define POINT 	3
 	#define PATH 	4
 
-	typedef struct {
+	/****************STRUCTURES****************/
+	typedef struct {			// Structure représentant un point
 		double x;
 		double y;
 		int isRelative;
 	}s_point;
 
-	/*
-	* Table contenant les variables crees par l'utilisateur
-	*/
-
-	struct s_table{
+	struct s_table{				// Table contenant les variables créées par l'utilisateur
 		char *name;
 		int type;
-		union {
+		union {					// Une variable n'est que d'un seul type, autant économiser la mémoire
 			double d_value;
 			int i_value;
 			s_point p_value;
@@ -36,10 +33,21 @@
 	};
 
 	typedef struct s_table table;
+	/**************************************************/
 
-	table *var_table = NULL;
+	/****************VARIABLES GLOBALES****************/
+	cairo_surface_t * pdf_surface;	// Le pdf dans lequel on va écrire
+	cairo_t* cr;					// Le contexte cairo
+	s_point *tab_points;			// Le tableau contenant l'esemble des points dans la commande en cours de traitement
+	int i_pts;						// Le nombre de points actuellement présents dans tab_points
+	int tab_size;					// La taille max de tab_points (pour l'allocation dynamique)
+	table *var_table = NULL;		// La table de variables
+	/**************************************************/
+
+
+	/****************FONCTIONS****************/
 	
-	table *getvar(char* name){
+	table *getvar(char* name){			// Récupération d'une variable par son nom dans la table
 		
 		table *iter = var_table;
 		
@@ -54,7 +62,7 @@
 		return NULL;
 	}
 
-	table *addvar(char* name, int type){
+	table *addvar(char* name, int type){	// Ajout d'une variable dans la table
 
 		table *var = getvar(name);
 
@@ -76,13 +84,9 @@
 
 
 
-	cairo_surface_t * pdf_surface;
-	cairo_t* cr;
-	s_point *tab_points;
-	int i_pts;
-	int tab_size;
+	
 
-	void extend_tab()
+	void extend_tab()					// Agrandissement du tableau de points dynamique
 	{
 		s_point *tmp = malloc(2*tab_size*sizeof(s_point));
 		int i;
@@ -92,7 +96,7 @@
 		tab_points = tmp;
 	}
 
-	freee()
+	freee()								// Libération de la mémoire
 	{
 		table *iter = var_table;
 		table *tmp;
@@ -103,8 +107,10 @@
 			iter = (table*) iter->next;
 			free(tmp);
 		}
-		//free(tab_points);
+		//free(tab_points); (pas celui la il est global)
 	}
+
+	/**************************************************/
 %}
 
 %union {
@@ -129,17 +135,17 @@
 
 %left '-' '+' '/' '*' SEPARATOR RELATIVE_SEPARATOR
 
-%%
-in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}
-		| 
-		| EOL
+%%																						// Symbole de départ
+in:		line in ENDFILE {printf("End of stream reached, exiting...\n"); return 0;}		// Entrée complète exploitable
+		| 																				// Ou rien
+		| EOL																			// Ou \n
 		;
-
-line: 	cmd EOL	
-		| error EOL	{printf("\nERROR\n");}
+																						// Dans une ligne :
+line: 	cmd EOL																			// Une commande
+		| error EOL	{printf("\nERROR\n");}												// Ou une erreur
 		;
-
-cmd:	DRAW points ';' {	
+																						// Une commande peut être :
+cmd:	DRAW points ';' {																// Une commande de dessin simple avec une liste de points
 					int i;
 					for(i=0;i<i_pts;i++)
 					{
@@ -154,11 +160,11 @@ cmd:	DRAW points ';' {
 					cairo_stroke(cr);
 					i_pts = 0;
 				}
-		| var ';'
-		| function ';'
+		| var ';'																		// Ou une déclaration de variable
+		| function ';'																	// Ou un appel de fonction
 		;
-
-function: ROTATE '(' STR ',' point ',' exp ')' {
+																						// Une fonction est :
+function: ROTATE '(' STR ',' point ',' exp ')' {										// Une rotation
 												table* var = getvar($3);
 												s_point centre = $5;
 												if (var->type == POINT){
@@ -186,7 +192,7 @@ function: ROTATE '(' STR ',' point ',' exp ')' {
 												}
 												}
 			|									
-			TRANSLATE '(' STR ',' point ')' {
+			TRANSLATE '(' STR ',' point ')' {											// Ou une translation
 												table* var = getvar($3);
 												if (var->type == POINT){
 													double x2 = var->value.p_value.x;
@@ -209,22 +215,22 @@ function: ROTATE '(' STR ',' point ',' exp ')' {
 												}
 												}							
 		;
-
-points:	point 					{
+																						// Une liste de points contient :
+points:	point 					{														// Un point
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $1;
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;	
 								}
-		| points SEPARATOR point 	{
+		| points SEPARATOR point 	{													// Ou un ensemble de points en coordonnées absolues
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;
 								}
-		| points RELATIVE_SEPARATOR point {
+		| points RELATIVE_SEPARATOR point {												// Ou un ensemble de points en coordonnées relatives
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
@@ -232,24 +238,24 @@ points:	point 					{
 									i_pts++;
 								}					
 		;
-
-point:	cart 					{
+																						// Un point est :
+point:	cart 					{														// Une paire de coordonnées cartésiennes
 									$$ = $1;
 								}
-		| pol					{
+		| pol					{														// Ou une paire de coordonnées polaires
 									$$ = $1;
 								}
-		| CYCLE					{
+		| CYCLE					{														// Ou le 1er point du chemin (pour former des cycles)
 									$$ = tab_points[0];
 								}
-		| STR					{
+		| STR					{														// Ou une variable
 									table* var = getvar($1);
 									if (var->type == POINT)
 										$$ = var->value.p_value;
 								}
 		;
 
-cart:	'('exp','exp')'			{
+cart:	'('exp','exp')'			{														//Des coordonnées cartésiennes sont une paire d'expressions entre parenthèses séparées par une virgule
 									s_point res;
 									res.x = $2;
 									res.y = $4;
@@ -257,30 +263,30 @@ cart:	'('exp','exp')'			{
 								}
 		;
 
-pol:	'('exp':'exp')'			{
+pol:	'('exp':'exp')'			{														//Des coordonnées polaires sont une paire d'expressions entre parenthèses séparées par le caractère ':'
 									s_point res;
 									res.x = $4*cos($2);
 									res.y = $4*sin($2);
 									$$ = res;
 								}
 		;
-
-var: T_INT STR '=' exp			{
+																						// Une déclaration de variable peut concerner :
+var: T_INT STR '=' exp			{														// Un entier
 									table* var = addvar($2, INT);
 									var->value.i_value = $4;
 									var->size = 1;
 								}
-	| T_DOUBLE STR '=' exp		{
+	| T_DOUBLE STR '=' exp		{														// Ou un décimal
 									table* var = addvar($2, DOUBLE);
 									var->value.d_value = $4;
 									var->size = 1;
 								}
-	| T_POINT STR '=' point 	{
+	| T_POINT STR '=' point 	{														// Ou un point
 									table* var = addvar($2, POINT);
 									var->value.p_value = $4;
 									var->size = 1;
 								}
-	| T_PATH STR '=' points		{
+	| T_PATH STR '=' points		{														// Ou un chemin
 									table* var = addvar($2, PATH);
 									s_point *tmp = malloc(i_pts*sizeof(s_point));
 									int i;
@@ -290,11 +296,11 @@ var: T_INT STR '=' exp			{
 									var->size = i_pts;	
 								}
 	;	
-
-exp:	NB						{
+																						// Une expression est :
+exp:	NB						{														// Un nombre
 									$$ = $1;
 								}
-		| STR 					{
+		| STR 					{														// Ou une variable
 									table* var = getvar($1);
 									if (var == NULL){
 										printf("Var `%s` doesn't exists\n", $1); YYABORT; }
@@ -304,28 +310,25 @@ exp:	NB						{
 										$$ = var->value.d_value;
 
 								}
-		| PI					{
+		| PI					{														// Ou PI
 									$$ = M_PI;
 								}
-		| '-'PI					{
-									$$ = M_PI*-1;
-								}
-		| '-'NB					{
+		| '-'exp				{														// Ou l'opposé d'une expression
 									$$ = -$2;
 								}
-		| exp '/' exp				{
+		| exp '/' exp			{														// Ou le quotient de deux expressions
 									$$ = $1/$3;
 								}
-		| exp '+' exp				{
+		| exp '+' exp			{														// Ou la somme de deux expressions
 									$$ = $1+$3;
 								}
-		| exp '*' exp				{
+		| exp '*' exp			{														// Ou le produit de deux expressions
 									$$ = $1*$3;
 								}
-		| exp '-' exp				{
+		| exp '-' exp			{														// Ou la différence de deux expressions
 									$$ = $1-$3;
 								}
-		| '('exp')'				{ $$ = $2; }
+		| '('exp')'				{ $$ = $2; }											// Ou une expression entre parenthèses
 		;
 
 %%
@@ -335,15 +338,15 @@ yyerror(char* msg){
 
 int main(int argc, char *argv[]){
 
-	pdf_surface = cairo_pdf_surface_create("out.pdf", 250, 250);
-	cr = cairo_create(pdf_surface);
-	cairo_set_line_width (cr, 1.0);
-	i_pts = 0;
-	tab_size = 10;
-	tab_points = malloc(10*sizeof(s_point));
-	yyparse();
-	freee();
-	cairo_destroy(cr);
-	cairo_surface_destroy(pdf_surface);
+	pdf_surface = cairo_pdf_surface_create("out.pdf", 250, 250);		// Création du pdf
+	cr = cairo_create(pdf_surface);										// Création du contexte cairo lié au pdf
+	cairo_set_line_width (cr, 1.0);										// Initialisation de la largeur de trait
+	i_pts = 0;															// Le tableau de points n'en contient aucun
+	tab_size = 10;														// Et peut en contenir jusqu'a 10
+	tab_points = malloc(10*sizeof(s_point));							// Allocation de la mémoire nécessaire
+	yyparse();															// Lancement de la boucle d'analyse
+	freee();															// Quand tout est fini libération de la mémoire
+	cairo_destroy(cr);													// Destruction du contexte cairo
+	cairo_surface_destroy(pdf_surface);									// Et de la représentation en mémoire du pdf
 	return 0;
 }
