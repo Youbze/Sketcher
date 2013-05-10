@@ -148,10 +148,8 @@ line: 	cmd EOL																			// Une commande
 																						// Une commande peut être :
 cmd:	DRAW points ';' {																// Une commande de dessin simple avec une liste de points
 					int i;
-					printf("size i_pts = %d\n", i_pts);
 					for(i=0;i<i_pts;i++)
 					{
-						printf("PT(%f,%f)\n",tab_points[i].x ,tab_points[i].y);
 						if(tab_points[i].isRelative && i > 0)
 						{
 							tab_points[i].x+=tab_points[i-1].x;
@@ -228,20 +226,18 @@ points:	point 					{														// Un point
 										tab_points[i_pts] = $1;
 										tab_points[i_pts].isRelative = 0;
 										i_pts++;
-										printf("point i++\n");	
 									}
 								}
 
-									//Coordonnees absolues
+																						//Coordonnees absolues
 		| points SEPARATOR point 	{													// Ou un ensemble de points en coordonnées absolues
 									if(i_pts == tab_size)
 										extend_tab();
 									tab_points[i_pts] = $3;
 									tab_points[i_pts].isRelative = 0;
 									i_pts++;
-									printf("points SEP point i++\n");	
 								}
-									//Coordonnees relatives
+																						//Coordonnees relatives
 		| points RELATIVE_SEPARATOR point {												// Ou un ensemble de points en coordonnées relatives
 									if(i_pts == tab_size)
 										extend_tab();
