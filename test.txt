@@ -1,6 +1,6 @@
 Lignes brisées : 
 
-Rajouter un test en coordonnées polaires
+draw (100,100)--+(0:50)--+(PI/2:50)--+(PI*1.2:50)--cycle;
 
 draw (0,10)--(10,10)--((10+10)/3,(10+10)/3); OK
 

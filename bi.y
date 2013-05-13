@@ -273,7 +273,9 @@ point:	cart 					{														// Une paire de coordonnées cartésiennes
 								}
 		| STR					{														// Ou une variable
 									table* var = getvar($1);
-									if (var->type == POINT)
+									if (var == NULL){
+										printf("Var `%s` doesn't exists\n", $1); YYABORT; }
+									else if (var->type == POINT)
 										$$ = var->value.p_value;
 									else if (var->type == PATH)
 										varMode = 1;
